@@ -11,27 +11,26 @@ class CategoryModel extends Model
         $this->table = 'categories';
     }
     
-    public function create($name){
+    public function create($name) {
         $sql = "INSERT INTO `$this->table` (`name`) VALUES ('$name')";
         return $this->connect->query($sql);
     }
     
-    public function edit($id, $data){
-        $name = $data['name'];
-        return $this->connect->query("UPDATE `$this->table` SET `name`='$name'' WHERE `id`=$id");
+    public function edit($id, $name) {
+        return $this->connect->query("UPDATE `$this->table` SET `name`='$name' WHERE `id`=$id");
     }
     
-    public function remove($id){
-        return $this->connect->query("DELETE FROM `$this->table` WHERE `id`=$id");
+    public function remove($id) {
+        return $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $id");
     }
     
-    public function get($id){
+    public function get($id) {
         $result = $this->connect->query("SELECT * FROM `$this->table` WHERE `id` = $id");
         $category = $result->fetch_all(MYSQLI_ASSOC);
         return $category ?? false;
     }
     
-    public function find(){
+    public function find() {
         $result = $this->connect->query("SELECT * FROM `$this->table`");
         $categories = $result->fetch_all(MYSQLI_ASSOC);
         return $categories ?? false;

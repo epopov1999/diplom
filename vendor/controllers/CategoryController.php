@@ -9,12 +9,28 @@ class CategoryController
         
     }
     
-    public function create ($data = null) {
-        //что то в этом духе...
+    public function create($data) {
         $model = new CategoryModel();
-        $model->create($_GET['name']);
-        
-        //... у например продукта эти методы будут больше
-        //т.к. будут задействованы разные модели
+        return $model->create($data['name']);
+    }
+    
+    public function edit($data) {
+        $model = new CategoryModel();
+        return $model->edit($data['id'], $data['name']);
+    }
+    
+    public function remove($data) {
+        $model = new CategoryModel();
+        return $model->remove($data['id']);
+    }
+    
+    public function get($data) {
+        $model = new CategoryModel();
+        Response::send($model->get($data['id']));
+    }
+    
+    public function find($data = null) {
+        $model = new CategoryModel();
+        Response::send($model->find());
     }
 }

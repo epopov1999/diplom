@@ -11,6 +11,6 @@ class Bootstrap
         $action = $parts[2];
         $data = $parts[3];
         $controller = new $controller_name;
-        $controller->$action($data);
+        $controller->$action($_REQUEST);
     }
 }

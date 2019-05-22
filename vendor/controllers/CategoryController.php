@@ -10,11 +10,13 @@ class CategoryController extends Controller
     }
     
     public function create($data) {
-        debug('test');
         if ($this->isAdmin()) {
             $model = new CategoryModel();
-            $model->create($data['name']);
-            Response::send(true, 'Категория успешно добавлена');
+            if (!is_null($data['name'])) {
+                $model->create($data['name']);
+                Response::send(true, 'Категория успешно добавлена');
+            } Response::send(false, 'Ошибка при создании категории');
+            
         } Response::send(false, '403. Ошибка авторизации.');
     }
     

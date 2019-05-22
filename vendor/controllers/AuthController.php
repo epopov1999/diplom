@@ -6,16 +6,14 @@ class AuthController extends Controller
         $user = new UserModel();
         $token = $user->auth($data['login'], $data['password']);
         if ($token) {
-            if(!isset($_COOKIE['admintoken'])) {
-                setcookie('admintoken', $token);  
-            }
+            setcookie('admintoken', $token, time()+3600*3+60*15, '/');  
             Response::send(true, 'Успешная авторизация');
         } Response::send(false, 'Ошибка авторизации');
     }
     
-//    public function logout() {
+    public function logout() {
 //        unset($_COOKIE['admintoken']);
-//        setcookie("admintoken", null);
-//        Response::send(true, 'Вы успешно деавторизовались');
-//    }
+        setcookie("admintoken", "", time()-3600*3+60*15, '/');
+        Response::send(true, 'Вы успешно деавторизовались');
+    }
 }

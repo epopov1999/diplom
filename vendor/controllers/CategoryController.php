@@ -2,7 +2,7 @@
 /**
  * 
  */
-class CategoryController
+class CategoryController extends Controller
 {
     public function __construct(){
         
@@ -10,8 +10,12 @@ class CategoryController
     }
     
     public function create($data) {
-        $model = new CategoryModel();
-        return $model->create($data['name']);
+        debug('test');
+        if ($this->isAdmin()) {
+            $model = new CategoryModel();
+            $model->create($data['name']);
+            Response::send(true, 'Категория успешно добавлена');
+        } Response::send(false, '403. Ошибка авторизации.');
     }
     
     public function edit($data) {

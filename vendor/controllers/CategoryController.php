@@ -9,10 +9,10 @@ class CategoryController
         
     }
     
-    public function create($data){
+    public function create ($data = null) {
         //что то в этом духе...
         $model = new CategoryModel();
-        $model->create($data);
+        $model->create($_GET['name']);
         
         //... у например продукта эти методы будут больше
         //т.к. будут задействованы разные модели

@@ -11,8 +11,7 @@ class CategoryModel extends Model
         $this->table = 'categories';
     }
     
-    public function create($data){
-        $name = $data['name'];
+    public function create($name){
         $sql = "INSERT INTO `$this->table` (`name`) VALUES ('$name')";
         return $this->connect->query($sql);
     }

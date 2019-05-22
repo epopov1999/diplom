@@ -11,13 +11,14 @@ class OrderModel extends Model
         $this->table = 'orders';
     }
 
-    public function create($data){
-        $customerId = $data['customerId']; //с фронта будет слаться айдишник потому что заполнение личных данных скажем сделать отдельной страницей ибо нехуй выебываться
+    public function create($data) {
+        $customerId = $data['customerId']; 
         $sql = "INSERT INTO `$this->table` (`customer_id`) VALUES ($customerId);";
         $this->table = 'orders_products';
-        //алеша как писать запросы в твоей архитектуре
-        $orderId = null; //TODO подтянуть из записи в orders которую мы выше сделали
-        foreach($data['products'] as $product){
+        $this->connect->query($sql);
+
+        $orderId = $this->connect->insert_id;
+        foreach($data['products'] as $product) {
             $sql += "INSERT INTO `$this->table` (`order_id`, `product_id`) VALUES ($orderId, $product);";
         }
 
@@ -25,12 +26,12 @@ class OrderModel extends Model
         return $this->connect->query($sql);
     }
 
-    public function edit($data){ //дата потому что у нас модель составная ебать копать
+    public function edit($data) {
         $id = $data['id'];
         $customerId = $data['customerId']; 
         $sql = "UPDATE `$this->table` SET (`customer_id`) VALUES ($customerId) WHERE `id` = $id;";
         $this->table = 'orders_products';
-        //алеша как писать запросы в твоей архитектуре
+
         $orderId = $id; 
         foreach($data['products'] as $product){
             $sql += "UPDATE `$this->table` SET (`order_id`, `product_id`) VALUES ($orderId, $product) WHERE `order_id` = $orderId;";
@@ -40,7 +41,7 @@ class OrderModel extends Model
         return $this->connect->query($sql);
     }
 
-    public function remove($orderId){
+    public function remove($orderId) {
         $this->table = 'orders_products';
         $sql = "DELETE FROM `$this->table` WHERE `order_id` = $orderId;";
         $this->table = 'orders';
@@ -48,7 +49,7 @@ class OrderModel extends Model
         return $this->connect->query($sql);
     }
 
-    public function get($id){
+    public function get($id) {
         $result = $this->connect->query("SELECT * FROM `$this->table` o INNER JOIN `orders_products` op ON o.id = op.order_id WHERE `id` = $id");
         $order = $result->fetch_all(MYSQLI_ASSOC);
         return $order ?? false;
@@ -59,7 +60,5 @@ class OrderModel extends Model
         $orders = $result->fetch_all(MYSQLI_ASSOC);
         return $orders ?? false;
     }
-
-    //TODO дописать гет и файнд сука сосать писюн люблю я собака ты собака я @ ты @
     
 }

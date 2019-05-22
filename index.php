@@ -5,6 +5,7 @@
     define('VENDOR',ROOT.'vendor'.SEP);
     define('MODELS',VENDOR.'models'.SEP);
     define('LIB',VENDOR.'lib'.SEP);
+    define('CONTROLLERS',VENDOR.'controllers'.SEP);
 
     define('ROOT_SITE',$_SERVER['DOCUMENT_ROOT'].SEP.'front'.SEP);
 

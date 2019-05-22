@@ -12,5 +12,5 @@
         echo '<pre>'; print_r($data); die();
     }
 
-    require_once('vendor/Autoloader.php');
+    require_once('vendor/lib/Autoloader.php');
     new Bootstrap();

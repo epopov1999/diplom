@@ -19,7 +19,7 @@ class CategoryModel extends Model
     
     public function edit($id, $data){
         $name = $data['name'];
-        return $this->connect->query("UPDATE `$this->table` SET `name`='$name'' WHERE `id`=$id")
+        return $this->connect->query("UPDATE `$this->table` SET `name`='$name'' WHERE `id`=$id");
     }
     
     public function remove($id){

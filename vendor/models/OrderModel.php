@@ -14,10 +14,9 @@ class OrderModel extends Model
     public function create($data) {
         $customerId = $data['customerId']; 
         $sql = "INSERT INTO `$this->table` (`customer_id`) VALUES ($customerId);";
-        $this->table = 'orders_products';
         $this->connect->query($sql);
-
         $orderId = $this->connect->insert_id;
+        $this->table = 'orders_products';
         foreach($data['products'] as $product) {
             $sql += "INSERT INTO `$this->table` (`order_id`, `product_id`) VALUES ($orderId, $product);";
         }

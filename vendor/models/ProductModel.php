@@ -60,12 +60,20 @@ class ProductModel extends Model
         return !empty($res);
     }
 
-    public function get($id) {
+    public function get($data) {
+        $id = $data['id'];
+        $lic = (isset($data['lic'])) ? $data['lic'] : null;
         $sql = "SELECT * FROM `$this->table` WHERE `id` = $id";
         $result = $this->connect->query($sql);
         $product = $result->fetch_all(MYSQLI_ASSOC)[0];
-        $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
-        $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
+        if (is_null($lic)) {
+            $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
+            $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
+        } else {
+            $get_price = $this->connect->query("SELECT sum from `prices` WHERE `product_id`=$id AND `license`='$lic'");
+            $product['price'] = $get_price->fetch_row()[0];
+            $product['lic'] = $lic;
+        }
         return $product ?? false;
     }
 

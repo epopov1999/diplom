@@ -45,7 +45,7 @@ class ProductController extends Controller
     
     public function get($data) {
         $model = new ProductModel();
-        Response::send(true, $model->get($data['id']));
+        Response::send(true, $model->get($data));
     }
     
     public function find($data = null) {

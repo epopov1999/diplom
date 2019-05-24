@@ -10,20 +10,17 @@ class OrderController extends Controller{
     }
     
     public function create($data) {
-        if ($this->isAdmin()) {
-            $model = new OrderModel();
-            //data[products] могут быть пустые
-            if (!is_null($data['customer_name']) && !is_null($data['customer_email'])) {
-                $model->create($data);
-                Response::send(true, 'Заказ успешно добавлен');
-            } Response::send(false, 'Ошибка при создании заказа');
-            
-        } Response::send(false, '403. Ошибка авторизации.');
+        $model = new OrderModel();
+        //data[products] могут быть пустые
+        if (!is_null($data['customer_name']) && !is_null($data['customer_email'])) {
+            $model->create($data);
+            Response::send(true, 'Заказ успешно добавлен');
+        } Response::send(false, 'Ошибка при создании заказа');
     }
     
     public function edit($data) {
-//        $model = new OrderModel();
-//        return $model->edit($data);
+       $model = new OrderModel();
+       return $model->edit($data);
     }
     
     public function remove($data) {

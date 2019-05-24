@@ -12,23 +12,25 @@ class OrderModel extends Model
     }
 
     public function create($data) {
-        /**
-        * @todo 
-        * разобраться как правильно создавать заказ
-        */
+
         $res = [];
         $cust_name = $data['customer_name'];
         $cust_email = $data['customer_email'];
         $res[] = $this->connect->query("INSERT INTO `customers` (`name`,`email`) VALUES ('$cust_name', '$cust_email');");
         $customer_id = $this->connect->insert_id;
 
-        $this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);");
+        $token = generateRandomString();
+        $this->connect->query("INSERT INTO `$this->table` (`customer_id`, `token`) VALUES ($customer_id, '$token');");
+        setcookie('ordertoken', $token, time() + (10 * 365 * 24 * 60 * 60), '/');
         $order_id = $this->connect->insert_id;
 
+        $cart = new CartModel();
+        $data['products'] = $cart->getProducts();
+        
         foreach($data['products'] as $product_id) {
             $res[] = $this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`) VALUES ($order_id, $product_id);");
         }
-
+        
         return !empty($res);
     }
 
@@ -50,14 +52,6 @@ class OrderModel extends Model
 //
 //        $this->table = 'orders';
 //        return $this->connect->query($sql);
-    }
-    
-    public function addProduct(){
-        
-    }
-    
-    public function removeProduct(){
-        
     }
 
     public function remove($orderId) {

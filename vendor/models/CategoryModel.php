@@ -16,7 +16,9 @@ class CategoryModel extends Model
         return $this->connect->query($sql);
     }
     
-    public function edit($id, $name) {
+    public function edit($data) {
+        $id = $data['id'];
+        $name = $data['name'];
         return $this->connect->query("UPDATE `$this->table` SET `name`='$name' WHERE `id`=$id");
     }
     
@@ -27,7 +29,7 @@ class CategoryModel extends Model
     public function get($id) {
         $result = $this->connect->query("SELECT * FROM `$this->table` WHERE `id` = $id");
         $category = $result->fetch_all(MYSQLI_ASSOC);
-        return $category ?? false;
+        return $category[0] ?? false;
     }
     
     public function find() {

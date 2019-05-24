@@ -15,57 +15,70 @@ class ProductModel extends Model
     public function create($data) {
         $categoryId = $data['categoryId'];
         $name = $data['name'];
-        $sql = "INSERT INTO `$this->table` (`name`, `categoryId`) VALUES ('$name', $categoryId);";
-        $this->table = 'prices';
-        $this->connect->query($sql);
-        
+        $sql = "INSERT INTO `$this->table` (`name`, `category_id`) VALUES ('$name', $categoryId);";
+        $res = [];
+        $res[] = $this->connect->query($sql);
+      
         $productId = $this->connect->insert_id; 
-        
-        foreach($data['prices'] as $price) {
-            $lic = $price['lic'];
-            $sum = $price['sum'];
-            $sql += "INSERT INTO `$this->table` (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $sum);";
+        $sql = '';
+        foreach ($data['prices'] as $lic => $price_value) {
+            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $price_value);";
+            $res[] = $this->connect->query($sql);
         }
-
-        $this->table = 'products';
-        return $this->connect->query($sql);
+        return !empty($res);
     }
 
     public function edit($data) {
         $id = $data['id'];
         $categoryId = $data['categoryId'];
         $name = $data['name'];
-        $sql = "UPDATE `$this->table` SET (`name`, `categoryId`) VALUES ('$name', $categoryId) WHERE `id` = $id;";
-        $this->table = 'prices';
-        $productId = $id;
-        foreach($data['prices'] as $price){
-            $lic = $price['lic'];
-            $sum = $price['sum'];
-            $sql += "UPDATE `$this->table` SET (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $sum) WHERE `product_id` = $productId;";
+        $sql = "UPDATE `$this->table` SET `name`='$name', `category_id`=$categoryId WHERE `id` = $id;";
+        $res = [];
+        $res[] = $this->connect->query($sql);
+
+        $res[] = $this->connect->query("DELETE FROM `prices` WHERE `product_id`=$id");
+        foreach ($data['prices'] as $lic => $price_value) {
+            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($id, '$lic', $price_value);";
+            $res[] = $this->connect->query($sql);
         }
 
-        $this->table = 'products';
-        return $this->connect->query($sql);
+        return !empty($res);
     }
 
     public function remove($productId) {
+        /**
+        * @todo
+        * продукт должен удаляться еще из заказов где он есть
+        */
         $this->table = 'prices';
         $sql = "DELETE FROM `$this->table` WHERE `product_id` = $productId;";
+        $res = [];
+        $res[] = $this->connect->query($sql);
         $this->table = 'products';
-        $sql += "DELETE FROM `$this->table` WHERE `id` = $productId";
-        return $this->connect->query($sql);
+        $sql = "DELETE FROM `$this->table` WHERE `id` = $productId;";
+        $res[] = $this->connect->query($sql);
+        return !empty($res);
     }
 
     public function get($id) {
-        $result = $this->connect->query("SELECT * FROM `$this->table` o INNER JOIN `prices` p ON o.id = p.product_id WHERE `id` = $id");
-        $product = $result->fetch_all(MYSQLI_ASSOC);
+        $sql = "SELECT * FROM `$this->table` WHERE `id` = $id";
+        $result = $this->connect->query($sql);
+        $product = $result->fetch_all(MYSQLI_ASSOC)[0];
+        $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
+        $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
         return $product ?? false;
     }
 
     public function find() {
-        $result = $this->connect->query("SELECT * FROM `$this->table` o INNER JOIN `prices` p ON o.id = p.product_id");
-        $product = $result->fetch_all(MYSQLI_ASSOC);
-        return $product ?? false;
+        $sql = "SELECT * FROM `$this->table`";
+        $result = $this->connect->query($sql);
+        $products = $result->fetch_all(MYSQLI_ASSOC);
+        foreach($products as &$product) {
+            $id = $product['id'];
+            $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
+            $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
+        }
+        return $products ?? false;
     }
     
 }

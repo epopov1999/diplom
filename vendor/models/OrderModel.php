@@ -12,45 +12,72 @@ class OrderModel extends Model
     }
 
     public function create($data) {
-        $customerId = $data['customerId']; 
-        $sql = "INSERT INTO `$this->table` (`customer_id`) VALUES ($customerId);";
-        $this->connect->query($sql);
-        $orderId = $this->connect->insert_id;
-        $this->table = 'orders_products';
-        foreach($data['products'] as $product) {
-            $sql += "INSERT INTO `$this->table` (`order_id`, `product_id`) VALUES ($orderId, $product);";
+        /**
+        * @todo 
+        * разобраться как правильно создавать заказ
+        */
+        $res = [];
+        $cust_name = $data['customer_name'];
+        $cust_email = $data['customer_email'];
+        $res[] = $this->connect->query("INSERT INTO `customers` (`name`,`email`) VALUES ('$cust_name', '$cust_email');");
+        $customer_id = $this->connect->insert_id;
+
+        $this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);");
+        $order_id = $this->connect->insert_id;
+
+        foreach($data['products'] as $product_id) {
+            $res[] = $this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`) VALUES ($order_id, $product_id);");
         }
 
-        $this->table = 'orders';
-        return $this->connect->query($sql);
+        return !empty($res);
     }
 
+    /**
+    * @todo 
+    * разобраться как правильно изменять заказ (клиента?)
+    * нужна ли возможность добавлять продукт и удалять его из заказа
+    */
     public function edit($data) {
-        $id = $data['id'];
-        $customerId = $data['customerId']; 
-        $sql = "UPDATE `$this->table` SET (`customer_id`) VALUES ($customerId) WHERE `id` = $id;";
-        $this->table = 'orders_products';
-
-        $orderId = $id; 
-        foreach($data['products'] as $product){
-            $sql += "UPDATE `$this->table` SET (`order_id`, `product_id`) VALUES ($orderId, $product) WHERE `order_id` = $orderId;";
-        }
-
-        $this->table = 'orders';
-        return $this->connect->query($sql);
+//        $id = $data['id'];
+//        $customerId = $data['customerId']; 
+//        $sql = "UPDATE `$this->table` SET (`customer_id`) VALUES ($customerId) WHERE `id` = $id;";
+//        $this->table = 'orders_products';
+//
+//        $orderId = $id; 
+//        foreach($data['products'] as $product){
+//            $sql += "UPDATE `$this->table` SET (`order_id`, `product_id`) VALUES ($orderId, $product) WHERE `order_id` = $orderId;";
+//        }
+//
+//        $this->table = 'orders';
+//        return $this->connect->query($sql);
+    }
+    
+    public function addProduct(){
+        
+    }
+    
+    public function removeProduct(){
+        
     }
 
     public function remove($orderId) {
         $this->table = 'orders_products';
-        $sql = "DELETE FROM `$this->table` WHERE `order_id` = $orderId;";
+        $res = [];
+        $res[] = $this->connect->query("DELETE FROM `$this->table` WHERE `order_id` = $orderId;");
         $this->table = 'orders';
-        $sql += "DELETE FROM `$this->table` WHERE `id` = $orderId";
-        return $this->connect->query($sql);
+        $res[] = $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $orderId;");
+        return !empty($res);
     }
 
     public function get($id) {
-        $result = $this->connect->query("SELECT * FROM `$this->table` o INNER JOIN `orders_products` op ON o.id = op.order_id WHERE `id` = $id");
-        $order = $result->fetch_all(MYSQLI_ASSOC);
+        $order = [];
+        $sql = "SELECT customer_id FROM `$this->table` WHERE `id` = $id";
+        $result = $this->connect->query($sql);
+        $customer_id = $result->fetch_all(MYSQLI_NUM)[0][0];
+
+        $get_customer = $this->connect->query("SELECT name as customer_name, email as customer_email FROM `customers` WHERE id=$customer_id");
+        $order = $get_customer->fetch_all(MYSQLI_ASSOC)[0];
+        debug($order);
         return $order ?? false;
     }
 

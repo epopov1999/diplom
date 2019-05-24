@@ -21,22 +21,32 @@ class CategoryController extends Controller
     }
     
     public function edit($data) {
-        $model = new CategoryModel();
-        return $model->edit($data['id'], $data['name']);
+        if ($this->isAdmin()) {
+            $model = new CategoryModel();
+            if (!is_null($data['id']) && !is_null($data['name'])) {
+                $model->edit($data['id'], $data['name']);
+                Response::send(true, 'Категория успешно изменена');
+            }
+        } Response::send(false, '403. Ошибка авторизации.');
     }
     
     public function remove($data) {
-        $model = new CategoryModel();
-        return $model->remove($data['id']);
+        if ($this->isAdmin()) {
+            $model = new CategoryModel();
+            if (!is_null($data['id'])) {
+                $model->remove($data['id']);
+                Response::send(true, 'Категория успешно удалена');
+            }
+        } Response::send(false, '403. Ошибка авторизации.');
     }
     
     public function get($data) {
         $model = new CategoryModel();
-        Response::send($model->get($data['id']));
+        Response::send(true, $model->get($data['id']));
     }
     
     public function find($data = null) {
         $model = new CategoryModel();
-        Response::send($model->find());
+        Response::send(true, $model->find());
     }
 }

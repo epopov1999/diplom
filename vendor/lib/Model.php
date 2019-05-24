@@ -19,7 +19,7 @@ class Model
         
     }
     
-    public function edit($id, $data){
+    public function edit($data){
         
     }
     

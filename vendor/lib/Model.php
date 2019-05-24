@@ -1,5 +1,9 @@
 <?php
 /**
+* @todo перенести базу данных на sqlite
+* изменить конструктор этого класса $this->connect = ... {$db из скрипта /lib/Database.php}
+*/
+/**
  * класс взаимодействия с БД, с методами функционала API
  */
 class Model
@@ -31,7 +35,7 @@ class Model
         
     }
     
-    public function find(){
+    public function find($filter = null){
         
     }
 

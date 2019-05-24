@@ -1,4 +1,5 @@
 <?php
+
 /**
 * @class OrderModel
 */
@@ -12,23 +13,34 @@ class OrderModel extends Model
     }
 
     public function create($data) {
-
         $res = [];
+        
+        if (isset($_COOKIE['ordertoken'])) {
+            $token = $_COOKIE['ordertoken'];
+        } else {
+            $token = generateRandomString();
+            setcookie('ordertoken', $token, time() + (10 * 365 * 24 * 60 * 60), '/');
+        }
+        
         $cust_name = $data['customer_name'];
         $cust_email = $data['customer_email'];
-        $res[] = $this->connect->query("INSERT INTO `customers` (`name`,`email`) VALUES ('$cust_name', '$cust_email');");
-        $customer_id = $this->connect->insert_id;
+        $get_customer = $this->connect->query("SELECT `id`, `token` FROM `customers` WHERE `email`='$cust_email'");
+        $customer = $get_customer->fetch_all(MYSQLI_ASSOC);
+        if (!empty($customer)) {
+            $customer_id = $customer[0]['id'];
+        } else {
+            $res[] = $this->connect->query("INSERT INTO `customers` (`name`,`email`,`token`) VALUES ('$cust_name', '$cust_email','$token');");
+            $customer_id = $this->connect->insert_id;
+        }
 
-        $token = generateRandomString();
-        $this->connect->query("INSERT INTO `$this->table` (`customer_id`, `token`) VALUES ($customer_id, '$token');");
-        setcookie('ordertoken', $token, time() + (10 * 365 * 24 * 60 * 60), '/');
+        $this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);");
+        
         $order_id = $this->connect->insert_id;
-
         $cart = new CartModel();
         $data['products'] = $cart->getProducts();
-        
-        foreach($data['products'] as $product_id) {
-            $res[] = $this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`) VALUES ($order_id, $product_id);");
+
+        foreach($data['products'] as $product) {
+            $res[] = $this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`, `lic`, `count`) VALUES ($order_id, $product->product_id, '$product->lic', $product->count);");
         }
         
         return !empty($res);
@@ -63,22 +75,32 @@ class OrderModel extends Model
         return !empty($res);
     }
 
-    public function get($id) {
-        $order = [];
-        $sql = "SELECT customer_id FROM `$this->table` WHERE `id` = $id";
-        $result = $this->connect->query($sql);
-        $customer_id = $result->fetch_all(MYSQLI_NUM)[0][0];
+    public function get($token) {
+        $get_customer = $this->connect->query("SELECT * FROM `customers` WHERE `token`='$token'");
+        $customer = $get_customer->fetch_all(MYSQLI_ASSOC)[0];
+        $customer_id = $customer['id'];
+        
+        $get_orders = $this->connect->query("SELECT `id` FROM `orders` WHERE `customer_id`=$customer_id");
+        $orders_ids = array_column($get_orders->fetch_all(MYSQLI_ASSOC),'id',0);
 
-        $get_customer = $this->connect->query("SELECT name as customer_name, email as customer_email FROM `customers` WHERE id=$customer_id");
-        $order = $get_customer->fetch_all(MYSQLI_ASSOC)[0];
-        debug($order);
+        if (count($orders_ids)>1) {
+            return $this->find($orders_ids);
+        }
+        $order_id = $orders_ids[0];
+        $cart = new CartModel();
+        $order = [
+            'id_order' => $order_id,
+            'shopperName' => $customer['name'],
+            'shopperEmail' => $customer['email'],
+            'order' => $cart->getProducts()
+        ];
+
         return $order ?? false;
     }
 
-    public function find(){
-        $result = $this->connect->query("SELECT * FROM `$this->table` o INNER JOIN `orders_products` op ON o.id = op.order_id");
-        $orders = $result->fetch_all(MYSQLI_ASSOC);
-        return $orders ?? false;
+    // @todo случай когда несколько заказов у одного пользователя (по токену)
+    public function find($orders_ids = null) {
+        return null;
     }
     
 }

@@ -1,10 +1,26 @@
 <?php
 
 class CartModel extends Model
-{
-
+{    
     public function getProducts() {
-        return json_decode($_COOKIE['cart']);
+        if (isset($_COOKIE['cart'])) {
+            $products = [];
+            foreach (json_decode($_COOKIE['cart']) as $product) {
+                $id = $product->product_id;
+                $lic = $product->lic;
+                $count = $product->count;
+
+                $get_name = $this->connect->query("SELECT name from `products` WHERE id=$id");
+                $name = $get_name->fetch_all(MYSQLI_ASSOC)[0]['name'];
+
+                $get_price = $this->connect->query("SELECT `sum` from `prices` WHERE product_id=$id AND `license`='$lic'");
+                $price = $get_price->fetch_all(MYSQLI_ASSOC)[0]['sum'];
+
+                $products [] = ['id_product' => $id, 'count' => $count, 'naim_product' => $name, "price" => $price, 'lic' => $lic];
+            }
+            return $products;
+        }
+        return null;
     }
     
     public function addProduct($product_id, $lic) {

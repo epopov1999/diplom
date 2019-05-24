@@ -4,6 +4,9 @@
  */
 class Bootstrap
 {
+    /**
+    * @todo отладить роутинг (проверять action)
+    */
     public function __construct() {
         $parts = explode('/', rtrim($_SERVER['REQUEST_URI'], '/'));
         

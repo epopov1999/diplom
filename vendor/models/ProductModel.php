@@ -59,7 +59,7 @@ class ProductModel extends Model
         
         $this->table = 'products';
         $get_img_src = $this->connect->query("SELECT `image_src` from `$this->table` WHERE `id` = $productId;");
-        $img_src = $get_img_src->fetchArray(SQLITE3_ASSOC)[0];
+        $img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0];
         Image::remove($img_src);
         
         $sql = "DELETE FROM `$this->table` WHERE `id` = $productId;";
@@ -73,10 +73,10 @@ class ProductModel extends Model
         $lic = (isset($data['lic'])) ? $data['lic'] : null;
         $sql = "SELECT * FROM `$this->table` WHERE `id` = $id";
         $result = $this->connect->query($sql);
-        $product = $result->fetch_all(SQLITE3_ASSOC)[0];
+        $product = $result->fetchAll(PDO::FETCH_ASSOC)[0];
         if (is_null($lic)) {
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
-            $product['prices'] = array_column($get_prices->fetch_all(SQLITE3_ASSOC), 'sum' , 'license');
+            $product['prices'] = array_column($get_prices->fetchAll(PDO::FETCH_ASSOC), 'sum' , 'license');
         } else {
             $get_price = $this->connect->query("SELECT sum from `prices` WHERE `product_id`=$id AND `license`='$lic'");
             $product['price'] = $get_price->fetch_row()[0];
@@ -88,11 +88,11 @@ class ProductModel extends Model
     public function find() {
         $sql = "SELECT * FROM `$this->table`";
         $result = $this->connect->query($sql);
-        $products = $result->fetch_all(SQLITE3_ASSOC);
+        $products = $result->fetchAll(PDO::FETCH_ASSOC);
         foreach($products as &$product) {
             $id = $product['id'];
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
-            $product['prices'] = array_column($get_prices->fetch_all(SQLITE3_ASSOC), 'sum' , 'license');
+            $product['prices'] = array_column($get_prices->fetchAll(PDO::FETCH_ASSOC), 'sum' , 'license');
         }
         return $products ?? false;
     }

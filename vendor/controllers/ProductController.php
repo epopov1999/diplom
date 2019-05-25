@@ -1,6 +1,6 @@
 <?php
 /*
-*
+* @todo добавить новое свойство товара - картинка
 */
 class ProductController extends Controller
 {

@@ -11,10 +11,10 @@ class CartModel extends Model
                 $count = $product->count;
 
                 $get_name = $this->connect->query("SELECT name from `products` WHERE id=$id");
-                $name = $get_name->fetch_all(MYSQLI_ASSOC)[0]['name'];
+                $name = $get_name->fetch_all(SQLITE3_ASSOC)[0]['name'];
 
                 $get_price = $this->connect->query("SELECT `sum` from `prices` WHERE product_id=$id AND `license`='$lic'");
-                $price = $get_price->fetch_all(MYSQLI_ASSOC)[0]['sum'];
+                $price = $get_price->fetch_all(SQLITE3_ASSOC)[0]['sum'];
 
                 $products [] = ['id_product' => $id, 'count' => $count, 'naim_product' => $name, "price" => $price, 'lic' => $lic];
             }

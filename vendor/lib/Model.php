@@ -1,7 +1,8 @@
 <?php
 /**
 * @todo перенести базу данных на sqlite
-* изменить конструктор этого класса $this->connect = ... {$db из скрипта /lib/Database.php}
+* база работает, но надо понять где этот ебучий файл сука лежит
+* + переделать все моменты где вызывается $query->fetch_all на foreach($row = $query->fetchArray()) {...}
 */
 /**
  * класс взаимодействия с БД, с методами функционала API
@@ -83,7 +84,7 @@ class Model
             
             $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('admin','popov','123sobaka123')";
             $this->connect->query($sql);
-            $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('moder','mussa','test')";
+            $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('moder','test','test')";
             $this->connect->query($sql);
         }
     }

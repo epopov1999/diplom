@@ -65,10 +65,10 @@ class ProductModel extends Model
         $lic = (isset($data['lic'])) ? $data['lic'] : null;
         $sql = "SELECT * FROM `$this->table` WHERE `id` = $id";
         $result = $this->connect->query($sql);
-        $product = $result->fetch_all(MYSQLI_ASSOC)[0];
+        $product = $result->fetch_all(SQLITE3_ASSOC)[0];
         if (is_null($lic)) {
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
-            $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
+            $product['prices'] = array_column($get_prices->fetch_all(SQLITE3_ASSOC), 'sum' , 'license');
         } else {
             $get_price = $this->connect->query("SELECT sum from `prices` WHERE `product_id`=$id AND `license`='$lic'");
             $product['price'] = $get_price->fetch_row()[0];
@@ -80,11 +80,11 @@ class ProductModel extends Model
     public function find() {
         $sql = "SELECT * FROM `$this->table`";
         $result = $this->connect->query($sql);
-        $products = $result->fetch_all(MYSQLI_ASSOC);
+        $products = $result->fetch_all(SQLITE3_ASSOC);
         foreach($products as &$product) {
             $id = $product['id'];
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
-            $product['prices'] = array_column($get_prices->fetch_all(MYSQLI_ASSOC), 'sum' , 'license');
+            $product['prices'] = array_column($get_prices->fetch_all(SQLITE3_ASSOC), 'sum' , 'license');
         }
         return $products ?? false;
     }

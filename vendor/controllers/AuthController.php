@@ -2,7 +2,7 @@
 
 class AuthController extends Controller 
 {
-    public function auth($data) {
+    public function login($data) {
         $user = new UserModel();
         $token = $user->auth($data['login'], $data['password']);
         if ($token) {

@@ -28,13 +28,14 @@ class CategoryModel extends Model
     
     public function get($id) {
         $result = $this->connect->query("SELECT * FROM `$this->table` WHERE `id` = $id");
-        $category = $result->fetch_all(MYSQLI_ASSOC);
+        $category = $result->fetch_all(SQLITE3_ASSOC);
         return $category[0] ?? false;
     }
     
-    public function find() {
+    public function find($filter = null) {
         $result = $this->connect->query("SELECT * FROM `$this->table`");
-        $categories = $result->fetch_all(MYSQLI_ASSOC);
+        debug($result);
+        $categories = $result->fetchArray(SQLITE3_ASSOC);
         return $categories ?? false;
     }
 }

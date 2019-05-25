@@ -23,7 +23,7 @@ class Model
 //    }
     
     protected $connect;
-    private $dbfile = 'C:\OSPanel\domains\popov_exam.ru\database\shop.db';
+    private $dbfile = 'shop.db';
     
     /**
     * инициализация базы данных sqlite3

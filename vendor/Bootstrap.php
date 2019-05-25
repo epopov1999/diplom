@@ -14,7 +14,12 @@ class Bootstrap
             echo 'Hello World';
             exit();
         } else {
-            $controller->$action($_REQUEST);
+            try {
+                $controller->$action($_REQUEST);
+            } catch(Exception $ex) {
+                Response::send(false, $ex->getMessage());
+            }
+            
         }
     }
     

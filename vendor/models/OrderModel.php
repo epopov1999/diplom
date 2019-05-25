@@ -25,7 +25,7 @@ class OrderModel extends Model
         $cust_name = $data['customer_name'];
         $cust_email = $data['customer_email'];
         $get_customer = $this->connect->query("SELECT `id`, `token` FROM `customers` WHERE `email`='$cust_email'");
-        $customer = $get_customer->fetch_all(SQLITE3_ASSOC);
+        $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC);
         if (!empty($customer)) {
             $customer_id = $customer[0]['id'];
         } else {
@@ -77,11 +77,11 @@ class OrderModel extends Model
 
     public function get($token) {
         $get_customer = $this->connect->query("SELECT * FROM `customers` WHERE `token`='$token'");
-        $customer = $get_customer->fetch_all(SQLITE3_ASSOC)[0];
+        $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC)[0];
         $customer_id = $customer['id'];
         
         $get_orders = $this->connect->query("SELECT `id` FROM `orders` WHERE `customer_id`=$customer_id");
-        $orders_ids = array_column($get_orders->fetch_all(SQLITE3_ASSOC),'id',0);
+        $orders_ids = array_column($get_orders->fetchAll(PDO::FETCH_ASSOC),'id',0);
 
         if (count($orders_ids)>1) {
             return $this->find($orders_ids);

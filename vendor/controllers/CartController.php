@@ -6,6 +6,9 @@ class CartController extends Controller
     }
     
     public function addProduct($data) {
+        /** @todo
+        * если продукт не существует, то throw new exception
+        */
         $this->cart->addProduct($data['id'], $data['lic']);
     }
     

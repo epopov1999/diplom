@@ -17,7 +17,7 @@ class Bootstrap
             try {
                 $controller->$action($_REQUEST);
             } catch(Exception $ex) {
-                Response::send(false, $ex->getMessage());
+                Response::send(false, ['msg' => $ex->getMessage()]);
             }
             
         }

@@ -13,7 +13,7 @@ class CategoryModel extends Model
     
     public function create($name) {
         $sql = "INSERT INTO `$this->table` (`name`) VALUES ('$name')";
-        return $this->connect->query($sql);
+        return ($this->connect->query($sql)) ? $this->connect->lastInsertId() : false;
     }
     
     public function edit($data) {
@@ -34,8 +34,7 @@ class CategoryModel extends Model
     
     public function find($filter = null) {
         $result = $this->connect->query("SELECT * FROM `$this->table`");
-        debug($result);
         $categories = $result->fetchAll(PDO::FETCH_ASSOC);
-        return $categories ?? false;
+        return $categories ?? [];
     }
 }

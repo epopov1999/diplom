@@ -16,18 +16,15 @@ class ProductModel extends Model
         $categoryId = $data['categoryId'];
         $name = $data['name'];
         $image_src = Image::add();
-
         $sql = "INSERT INTO `$this->table` (`name`, `category_id`, `image_src`) VALUES ('$name', $categoryId, '$image_src');";
-        $res = [];
-        $res[] = $this->connect->query($sql);
+        if(!$this->connect->query($sql)) return false;
       
         $productId = $this->connect->insert_id; 
-        $sql = '';
         foreach ($data['prices'] as $lic => $price_value) {
             $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $price_value);";
-            $res[] = $this->connect->query($sql);
+            if(!$this->connect->query($sql)) return false;
         }
-        return !empty($res);
+        return true;
     }
 
     public function edit($data) {
@@ -85,7 +82,7 @@ class ProductModel extends Model
         return $product ?? false;
     }
 
-    public function find() {
+    public function find($filter = null) {
         $sql = "SELECT * FROM `$this->table`";
         $result = $this->connect->query($sql);
         $products = $result->fetchAll(PDO::FETCH_ASSOC);
@@ -94,7 +91,7 @@ class ProductModel extends Model
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
             $product['prices'] = array_column($get_prices->fetchAll(PDO::FETCH_ASSOC), 'sum' , 'license');
         }
-        return $products ?? false;
+        return $products ?? [];
     }
     
 }

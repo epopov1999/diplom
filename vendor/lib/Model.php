@@ -75,8 +75,9 @@ class Model
             $database->query($sql);
             $sql="CREATE TABLE `products` (
               `id` INTEGER PRIMARY KEY,
-              `category_id` INTEGER NOT NULL,
+              `category_id` INTEGER,
               `name` TEXT NOT NULL,
+              `img_src` TEXT NOT NULL,
               FOREIGN KEY (`category_id`) REFERENCES categories(id)
             )";
             $database->query($sql);

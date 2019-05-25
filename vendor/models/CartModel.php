@@ -66,22 +66,9 @@ class CartModel extends Model
                     }
                     
                     setcookie('cart', json_encode($cart), time()+3600*3+60*500, '/'); 
-                    /** 
-                    * @todo
-                    * сделать ответ что товар успешно удален
-                    */
                 }
             }
-            /** 
-            * @todo
-            * сделать ответ что товар не найден
-            */
-        } else {
-            /** 
-            * @todo
-            * сделать ответ что корзина пустая
-            */
-        }
+        } 
     }
     
     public function clearProducts(){

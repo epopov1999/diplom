@@ -8,15 +8,16 @@ class ProductController extends Controller
     }
     
     public function create($data) {
+        $name = $data['name'];
+        $prices = $data['prices'];
         if ($this->isAdmin()) {
-            $model = new ProductModel();
-            if (!is_null($data['name']) && !is_null($data['categoryId']) && !empty($data['prices'])) {
-                
-                $model->create($data);
-                Response::send(true, 'Продукт успешно добавлен');
-            } Response::send(false, 'Ошибка при создании продукта');
-            
-        } Response::send(false, '403. Ошибка авторизации.');
+            $product = new ProductModel();
+//            if (!is_null($name) && $name!="" && !empty($prices) && $prices['single']!="" && $prices['team']!="" && $prices['site']!="") {
+                if ($id = $product->create($data)) {
+                    Response::send(true, ['msg' => 'Товар успешно добавлен', 'id' => $id]);
+                } throw new Exception('Ошибка при создании товара');
+//            } throw new Exception('Укажите название товара и цены (массив)');
+        } throw new Exception('403 Ошибка авторизации');
     }
     
     public function edit($data) {
@@ -48,7 +49,8 @@ class ProductController extends Controller
     
     public function find($data = null) {
         $model = new ProductModel();
-        Response::send(true, $model->find());
+        $products = $model->find();
+        Response::send(true, $products);
     }
 
 }

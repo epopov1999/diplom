@@ -1,3 +1,19 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	</head>
+	<body>
+		<form action="/product/create/" method="post">
+			<input name="name" type="text" placeholder="name">
+			<input name="categoryId" type="text" placeholder="categoryId">
+			<input name="prices[single]" type="text" placeholder="single price">
+			<input name="prices[team]" type="text" placeholder="team price">
+			<input name="prices[site]" type="text" placeholder="site price">
+			<input type="file" accept="image/*" name="img_src">
+			<input type="submit">
+		</form>
+	</body>
+</html>
 <?php
     define('SEP',DIRECTORY_SEPARATOR);
     define('ROOT',__DIR__.SEP);
@@ -22,3 +38,4 @@
     }
     require_once('vendor/lib/Autoloader.php');
     new Bootstrap();
+?>

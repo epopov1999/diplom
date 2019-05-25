@@ -6,7 +6,6 @@
     define('LIB',VENDOR.'lib'.SEP);
     define('CONTROLLERS',VENDOR.'controllers'.SEP);
 
-    define('ROOT_SITE',$_SERVER['DOCUMENT_ROOT'].SEP.'front'.SEP);
 
     function debug($data){
         echo '<pre>'; print_r($data); exit();

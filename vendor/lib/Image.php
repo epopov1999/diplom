@@ -4,11 +4,11 @@
  */
 class Image
 {
-    private static $path = ROOT_SITE.'sources/images/';
+    private static $path = ROOT.'sources/images/';
     private static $allowTypes = ['image/png','image/jpg','image/jpeg'];
     private static $allowSize = 2*1024;
 
-    public static function add(){
+    public static function add() {
         $tempName = $_FILES['image']['tmp_name'];
         $realName = $_FILES['image']['name'];
 
@@ -35,8 +35,8 @@ class Image
         }
     }
 
-    public static function remove($src){
-        if ($src!=""){
+    public static function remove($src) {
+        if ($src != ""){
             $src = self::$path.$src;
             if(file_exists($src)) {
                 unlink($src);

@@ -15,7 +15,9 @@ class ProductModel extends Model
     public function create($data) {
         $categoryId = $data['categoryId'];
         $name = $data['name'];
-        $sql = "INSERT INTO `$this->table` (`name`, `category_id`) VALUES ('$name', $categoryId);";
+        $image_src = Image::add();
+
+        $sql = "INSERT INTO `$this->table` (`name`, `category_id`, `image_src`) VALUES ('$name', $categoryId, '$image_src');";
         $res = [];
         $res[] = $this->connect->query($sql);
       
@@ -54,9 +56,15 @@ class ProductModel extends Model
         $sql = "DELETE FROM `$this->table` WHERE `product_id` = $productId;";
         $res = [];
         $res[] = $this->connect->query($sql);
+        
         $this->table = 'products';
+        $get_img_src = $this->connect->query("SELECT `image_src` from `$this->table` WHERE `id` = $productId;");
+        $img_src = $get_img_src->fetchArray(SQLITE3_ASSOC)[0];
+        Image::remove($img_src);
+        
         $sql = "DELETE FROM `$this->table` WHERE `id` = $productId;";
         $res[] = $this->connect->query($sql);
+
         return !empty($res);
     }
 

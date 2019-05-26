@@ -93,6 +93,9 @@ class Model
             $database->query($sql);
             $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('moder','test','test')";
             $database->query($sql);
+            
+            $sql = "INSERT INTO `categories` (`id`,`name`) VALUES (0,'Без категории')";
+            $database->query($sql);
         }
     }
     

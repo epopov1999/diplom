@@ -1,41 +1,29 @@
-<!DOCTYPE HTML>
-<html>
-	<head>
-	</head>
-	<body>
-		<form action="/product/create/" method="post">
-			<input name="name" type="text" placeholder="name">
-			<input name="categoryId" type="text" placeholder="categoryId">
-			<input name="prices[single]" type="text" placeholder="single price">
-			<input name="prices[team]" type="text" placeholder="team price">
-			<input name="prices[site]" type="text" placeholder="site price">
-			<input type="file" accept="image/*" name="img_src">
-			<input type="submit">
-		</form>
-	</body>
-</html>
 <?php
+
     define('SEP',DIRECTORY_SEPARATOR);
     define('ROOT',__DIR__.SEP);
     define('VENDOR',ROOT.'vendor'.SEP);
     define('MODELS',VENDOR.'models'.SEP);
     define('LIB',VENDOR.'lib'.SEP);
     define('CONTROLLERS',VENDOR.'controllers'.SEP);
+    
+    require_once('vendor/lib/Functions.php');
 
-
-    function debug($data){
-        echo '<pre>'; print_r($data); exit();
-    }
-
-    function generateRandomString($length = 10) {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
-    }
     require_once('vendor/lib/Autoloader.php');
+
     new Bootstrap();
-?>
+
+    /**
+    
+    @todo
+    
+    1. В корзине (в моделе или в контроллере) есть todo, посмотри там нужно обработать пару сценариев.
+    2. Разобраться с заказом. Как его получать, по id, по токену, или что там.
+    3. Проверить все контроллеры и все модели (кроме категории) 
+        3.1 сделать защиту от дурака. в каждом action приходит параметром $_request ($data). и там надо проверять нужные ключи, например $data['id'] 
+        3.2 проверить формат всех ответов (структура отдаваемых массивов должна быть по тз) 
+        3.3 провести краш тест каждого api метода 
+    4. сделать документацию по api
+    
+    */
+

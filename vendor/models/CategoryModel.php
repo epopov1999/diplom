@@ -27,14 +27,12 @@ class CategoryModel extends Model
     }
     
     public function get($id) {
-        $result = $this->connect->query("SELECT * FROM `$this->table` WHERE `id` = $id");
-        $category = $result->fetchAll(PDO::FETCH_ASSOC);
-        return $category[0] ?? false;
+        $get_category = $this->connect->query("SELECT * FROM `$this->table` WHERE `id` = $id");
+        return ($get_category) ? $get_category->fetchAll(PDO::FETCH_ASSOC)[0] : false;
     }
     
     public function find($filter = null) {
-        $result = $this->connect->query("SELECT * FROM `$this->table`");
-        $categories = $result->fetchAll(PDO::FETCH_ASSOC);
-        return $categories ?? [];
+        $get_categories = $this->connect->query("SELECT * FROM `$this->table`");
+        return ($get_categories) ? $get_categories->fetchAll(PDO::FETCH_ASSOC) : [];
     }
 }

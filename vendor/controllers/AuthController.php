@@ -7,7 +7,7 @@ class AuthController extends Controller
         $token = $user->auth($data['login'], $data['password']);
         if ($token) {
             setcookie('admintoken', $token, time()+3600*3+60*15, '/');  
-            Response::send(true, 'Успешная авторизация');
+            Response::send(true, ['msg'=>'Успешная авторизация','token'=>$token]);
         } throw new Exception('Ошибка авторизации');
     }
     

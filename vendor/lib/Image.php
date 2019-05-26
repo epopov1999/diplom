@@ -8,10 +8,11 @@ class Image
     private static $allowTypes = ['image/png','image/jpg','image/jpeg'];
     private static $allowSize = 2*1024;
 
-    public static function add() {
-        $tempName = $_FILES['image']['tmp_name'];
-        $realName = $_FILES['image']['name'];
-        debug($_FILES['image']);
+    public static function add($image_key) {
+
+        $tempName = $_FILES[$image_key]['tmp_name'];
+        $realName = $_FILES[$image_key]['name'];
+
         $nameFile = time().'_'.$realName;
         if (is_uploaded_file($tempName)) {
             $fileInfo = finfo_open(FILEINFO_MIME_TYPE);

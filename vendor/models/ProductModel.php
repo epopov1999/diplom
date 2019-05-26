@@ -1,5 +1,8 @@
 <?php
 /**
+* @todo проверить все методы (кроме create)
+*/
+/**
 * @class ProductModel
 */
 class ProductModel extends Model
@@ -15,16 +18,25 @@ class ProductModel extends Model
     public function create($data) {
         $categoryId = $data['categoryId'];
         $name = $data['name'];
-        $image_src = Image::add();
-        $sql = "INSERT INTO `$this->table` (`name`, `category_id`, `image_src`) VALUES ('$name', $categoryId, '$image_src');";
-        if(!$this->connect->query($sql)) return false;
-      
-        $productId = $this->connect->insert_id; 
-        foreach ($data['prices'] as $lic => $price_value) {
-            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $price_value);";
-            if(!$this->connect->query($sql)) return false;
+        $image_src = Image::add('img_src');
+        
+        if (is_null($categoryId) || $categoryId == '') $categoryId = 0;
+        $sql = "INSERT INTO `$this->table` (`name`, `category_id`, `img_src`) VALUES ('$name', $categoryId, '$image_src');";
+
+        if(!$this->connect->query($sql)) {
+            Image::remove($image_src);
+            return false;
         }
-        return true;
+      
+        $productId = $this->connect->lastInsertId();
+        foreach ($data['prices'] as $lic => $price_value) {
+            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($productId, '$lic', $price_value)";
+            if(!$this->connect->query($sql)) {
+                Image::remove($image_src);
+                return false;
+            }
+        }
+        return $productId;
     }
 
     public function edit($data) {

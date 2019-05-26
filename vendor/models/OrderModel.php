@@ -13,8 +13,7 @@ class OrderModel extends Model
     }
 
     public function create($data) {
-        $res = [];
-        
+
         if (isset($_COOKIE['ordertoken'])) {
             $token = $_COOKIE['ordertoken'];
         } else {
@@ -25,25 +24,24 @@ class OrderModel extends Model
         $cust_name = $data['customer_name'];
         $cust_email = $data['customer_email'];
         $get_customer = $this->connect->query("SELECT `id`, `token` FROM `customers` WHERE `email`='$cust_email'");
+        if (!$get_customer) return false;
         $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC);
         if (!empty($customer)) {
             $customer_id = $customer[0]['id'];
         } else {
-            $res[] = $this->connect->query("INSERT INTO `customers` (`name`,`email`,`token`) VALUES ('$cust_name', '$cust_email','$token');");
+            if (!$this->connect->query("INSERT INTO `customers` (`name`,`email`,`token`) VALUES ('$cust_name', '$cust_email','$token');")) return false;
             $customer_id = $this->connect->insert_id;
         }
 
-        $this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);");
+        if (!$this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);")) return false;
         
         $order_id = $this->connect->insert_id;
-        $cart = new CartModel();
-        $data['products'] = $cart->getProducts();
 
         foreach($data['products'] as $product) {
-            $res[] = $this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`, `lic`, `count`) VALUES ($order_id, $product->product_id, '$product->lic', $product->count);");
+            if(!$this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`, `lic`, `count`) VALUES ($order_id, $product->product_id, '$product->lic', $product->count);")) return false;
         }
         
-        return !empty($res);
+        return $order_id;
     }
 
     /**
@@ -65,12 +63,7 @@ class OrderModel extends Model
     }
 
     public function remove($orderId) {
-        $this->table = 'orders_products';
-        $res = [];
-        $res[] = $this->connect->query("DELETE FROM `$this->table` WHERE `order_id` = $orderId;");
-        $this->table = 'orders';
-        $res[] = $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $orderId;");
-        return !empty($res);
+        return ($this->connect->query("DELETE FROM `orders_products` WHERE `order_id` = $orderId;") && $this->connect->query("DELETE FROM `orders` WHERE `id` = $orderId;")) ? true : false;
     }
 
     public function get($token) {
@@ -96,7 +89,8 @@ class OrderModel extends Model
         return $order ?? false;
     }
 
-    // @todo случай когда несколько заказов у одного пользователя (по токену)
+    // @todo вернуть все заказы пользователя (если есть токен в куках)
+    // иначе вернуть все заказы если админ
     public function find($orders_ids = null) {
         return null;
     }

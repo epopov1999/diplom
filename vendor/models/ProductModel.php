@@ -14,11 +14,10 @@ class ProductModel extends Model
     }
 
     public function create($data) {
-        $categoryId = $data['categoryId'];
+        $categoryId = (is_null($data['categoryId']) || $data['categoryId'] == '') ? 0 : $data['categoryId'];
         $name = $data['name'];
         $image_src = Image::add('img_src');
-        
-        if (is_null($categoryId) || $categoryId == '') $categoryId = 0;
+
         $sql = "INSERT INTO `$this->table` (`name`, `category_id`, `img_src`) VALUES ('$name', $categoryId, '$image_src');";
 
         if(!$this->connect->query($sql)) {
@@ -37,42 +36,41 @@ class ProductModel extends Model
         return $productId;
     }
     
-    /**
-    * @todo как правильно редактировать (вопрос см. в контроллере)
-    */
     public function edit($data) {
-        return null;
-//        $id = $data['id'];
-//        $categoryId = $data['categoryId'];
-//        $name = $data['name'];
-//        $sql = "UPDATE `$this->table` SET `name`='$name', `category_id`=$categoryId WHERE `id` = $id;";
-//        $res = [];
-//        $res[] = $this->connect->query($sql);
-//
-//        $res[] = $this->connect->query("DELETE FROM `prices` WHERE `product_id`=$id");
-//        foreach ($data['prices'] as $lic => $price_value) {
-//            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($id, '$lic', $price_value);";
-//            $res[] = $this->connect->query($sql);
-//        }
-//
-//        return !empty($res);
+        $id = $data['id'];
+        $categoryId = (is_null($data['categoryId']) || $data['categoryId'] == '') ? 0 : $data['categoryId'];
+        $name = $data['name'];
+        
+        if (!$this->connect->query("DELETE FROM `prices` WHERE `product_id` = $id")) return false;
+        
+        foreach ($data['prices'] as $lic => $price_value) {
+            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($id, '$lic', $price_value)";
+            if(!$this->connect->query($sql)) return false;
+        }
+        
+        if (!$get_img_src = $this->connect->query("SELECT `img_src` from `$this->table` WHERE `id` = $id")) return false;
+        $old_img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0]['img_src'];
+        
+        $new_image_src = Image::add('img_src');
+        
+        if(!$this->connect->query("UPDATE `$this->table` SET `name` = '$name', `category_id` = $categoryId, `img_src` = '$new_image_src' WHERE `id`=$id")) {
+            Image::remove($new_image_src);
+            return false;
+        }
+        
+        Image::remove($old_img_src);
+        
+        return true;
     }
 
     public function remove($productId) {
-        /**
-        * @todo
-        * продукт должен удаляться еще из заказов где он есть
-        */
-        if (!$this->connect->query("DELETE FROM `prices` WHERE `product_id` = $productId;")) return false;
 
-        if (!$get_img_src = $this->connect->query("SELECT `img_src` from `$this->table` WHERE `id` = $productId;")) return false;
-        
-        $img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0]['img_src'];
-        Image::remove($img_src);
-        
-        if (!$this->connect->query("DELETE FROM `$this->table` WHERE `id` = $productId;")) return false;
-
-        return true;
+        if ($this->connect->query("DELETE FROM `orders_products` WHERE `product_id`=$productId") && $this->connect->query("DELETE FROM `prices` WHERE `product_id` = $productId") && ($get_img_src = $this->connect->query("SELECT `img_src` from `$this->table` WHERE `id` = $productId")) && $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $productId")) {
+            $img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0]['img_src'];
+            Image::remove($img_src);
+            return true;
+        }
+        return false;
     }
 
     public function get($data) {

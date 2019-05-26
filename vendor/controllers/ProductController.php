@@ -24,20 +24,24 @@ class ProductController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
-    /**
-    * @todo
-    * как правильно изменять продукт? проверять все ли параметры, или изменять только те что пришли?
-    */
     public function edit($data) {
         if ($this->isAdmin()) {
-            $model = new ProductModel();
-            if (!is_null($data['id']) && !is_null($data['name']) && !is_null($data['categoryId']) && !empty($data['prices'])) {
-                
-                $model->edit($data);
-                Response::send(true, 'Продукт успешно изменен');
-            } Response::send(false, 'Ошибка при изменении продукта');
-            
-        } Response::send(false, '403. Ошибка авторизации.');
+            $id = $data['id'];
+            $name = $data['name'];
+            $prices = $data['prices'];
+            $category_id = $data['categoryId'];
+            if (!is_null($id) && $id!="" && !is_null($name) && $name!="" && !empty($prices) && $prices['single']!="" && $prices['team']!="" && $prices['site']!="")  {
+                $product = new ProductModel();
+                if ($product->get(['id'=>$id])) {
+                    $category = new CategoryModel();
+                    if ($category->get($category_id)) {
+                        if ($product->edit($data)) {
+                            Response::send(true, ['msg' => 'Товар успешно изменен','id' => $id]);
+                        } throw new Exception('Ошибка при редактировании товара');
+                    } throw new Exception('Такой категории нет');
+                } throw new Exception('Товар отсутствует');
+            } throw new Exception('Укажите id, название товара и его цены (массив)');
+        } throw new Exception('403 Ошибка авторизации');
     }
     
     public function remove($data) {

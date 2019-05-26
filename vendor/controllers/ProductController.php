@@ -1,7 +1,5 @@
 <?php
-/**
-* @todo переделать все методы под структуру и проверки (кроме create)
-*/
+
 class ProductController extends Controller
 {
 
@@ -22,10 +20,14 @@ class ProductController extends Controller
                         Response::send(true, ['msg' => 'Товар успешно добавлен', 'id' => $id]);
                     } throw new Exception('Ошибка при создании товара');
                 } throw new Exception('Такой категории нет');
-            } throw new Exception('Укажите название товара и цены (массив)');
+            } throw new Exception('Укажите название товара и его цены (массив)');
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * @todo
+    * как правильно изменять продукт? проверять все ли параметры, или изменять только те что пришли?
+    */
     public function edit($data) {
         if ($this->isAdmin()) {
             $model = new ProductModel();
@@ -41,16 +43,21 @@ class ProductController extends Controller
     public function remove($data) {
         if ($this->isAdmin()) {
             $model = new ProductModel();
-            if (!is_null($data['id'])) {
-                $model->remove($data['id']);
-                Response::send(true, 'Продукт успешно удален');
-            } Response::send(false, 'Ошибка при удалении продукта');
-        } Response::send(false, '403. Ошибка авторизации.');
+            if (!is_null($data['id']) && $model->get($data)) {
+                if ($model->remove($data['id'])) {
+                    Response::send(true, 'Товар успешно удален');
+                } throw new Exception('Ошибка при удалении товара');
+            } throw new Exception('Товар отсутствует');
+        } throw new Exception('403 Ошибка авторизации');
     }
     
     public function get($data) {
+        $id = $data['id'];
+        $lic = $data['lic'];
         $model = new ProductModel();
-        Response::send(true, $model->get($data));
+        if ($product = $model->get($data)) {
+            Response::send(true, $product);
+        } throw new Exception('Товар отсутствует');
     }
     
     public function find($data = null) {

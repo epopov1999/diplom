@@ -23,7 +23,7 @@ class CategoryModel extends Model
     }
     
     public function remove($id) {
-        return $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $id");
+        return ($this->connect->query("UPDATE `products` SET `category_id`=0 WHERE `category_id`=$id") && $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $id"));
     }
     
     public function get($id) {

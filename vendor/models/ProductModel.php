@@ -1,7 +1,5 @@
 <?php
-/**
-* @todo проверить все методы (кроме create)
-*/
+
 /**
 * @class ProductModel
 */
@@ -38,22 +36,26 @@ class ProductModel extends Model
         }
         return $productId;
     }
-
+    
+    /**
+    * @todo как правильно редактировать (вопрос см. в контроллере)
+    */
     public function edit($data) {
-        $id = $data['id'];
-        $categoryId = $data['categoryId'];
-        $name = $data['name'];
-        $sql = "UPDATE `$this->table` SET `name`='$name', `category_id`=$categoryId WHERE `id` = $id;";
-        $res = [];
-        $res[] = $this->connect->query($sql);
-
-        $res[] = $this->connect->query("DELETE FROM `prices` WHERE `product_id`=$id");
-        foreach ($data['prices'] as $lic => $price_value) {
-            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($id, '$lic', $price_value);";
-            $res[] = $this->connect->query($sql);
-        }
-
-        return !empty($res);
+        return null;
+//        $id = $data['id'];
+//        $categoryId = $data['categoryId'];
+//        $name = $data['name'];
+//        $sql = "UPDATE `$this->table` SET `name`='$name', `category_id`=$categoryId WHERE `id` = $id;";
+//        $res = [];
+//        $res[] = $this->connect->query($sql);
+//
+//        $res[] = $this->connect->query("DELETE FROM `prices` WHERE `product_id`=$id");
+//        foreach ($data['prices'] as $lic => $price_value) {
+//            $sql = "INSERT INTO `prices` (`product_id`, `license`, `sum`) VALUES ($id, '$lic', $price_value);";
+//            $res[] = $this->connect->query($sql);
+//        }
+//
+//        return !empty($res);
     }
 
     public function remove($productId) {
@@ -61,20 +63,16 @@ class ProductModel extends Model
         * @todo
         * продукт должен удаляться еще из заказов где он есть
         */
-        $this->table = 'prices';
-        $sql = "DELETE FROM `$this->table` WHERE `product_id` = $productId;";
-        $res = [];
-        $res[] = $this->connect->query($sql);
+        if (!$this->connect->query("DELETE FROM `prices` WHERE `product_id` = $productId;")) return false;
+
+        if (!$get_img_src = $this->connect->query("SELECT `img_src` from `$this->table` WHERE `id` = $productId;")) return false;
         
-        $this->table = 'products';
-        $get_img_src = $this->connect->query("SELECT `image_src` from `$this->table` WHERE `id` = $productId;");
-        $img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0];
+        $img_src = $get_img_src->fetchAll(PDO::FETCH_ASSOC)[0]['img_src'];
         Image::remove($img_src);
         
-        $sql = "DELETE FROM `$this->table` WHERE `id` = $productId;";
-        $res[] = $this->connect->query($sql);
+        if (!$this->connect->query("DELETE FROM `$this->table` WHERE `id` = $productId;")) return false;
 
-        return !empty($res);
+        return true;
     }
 
     public function get($data) {
@@ -82,16 +80,20 @@ class ProductModel extends Model
         $lic = (isset($data['lic'])) ? $data['lic'] : null;
         $sql = "SELECT * FROM `$this->table` WHERE `id` = $id";
         $result = $this->connect->query($sql);
-        $product = $result->fetchAll(PDO::FETCH_ASSOC)[0];
+        if (!$result) return false;
+        if(empty($product = $result->fetchAll(PDO::FETCH_ASSOC))) return false;
+        $product = $product[0];
         if (is_null($lic)) {
             $get_prices = $this->connect->query("SELECT license, sum from `prices` WHERE `product_id`=$id");
+            if (!$get_prices) return false;
             $product['prices'] = array_column($get_prices->fetchAll(PDO::FETCH_ASSOC), 'sum' , 'license');
         } else {
             $get_price = $this->connect->query("SELECT sum from `prices` WHERE `product_id`=$id AND `license`='$lic'");
-            $product['price'] = $get_price->fetch_row()[0];
+            if (!$get_price) return false;
+            $product['price'] = $get_price->fetch()[0];
             $product['lic'] = $lic;
         }
-        return $product ?? false;
+        return $product;
     }
 
     public function find($filter = null) {

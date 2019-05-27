@@ -8,6 +8,10 @@ class CategoryController extends Controller
   
     }
     
+    /**
+    * добавление категории, требуется авторизация
+    * ожидает параметр name
+    */
     public function create($data) {
         $name = $data['name'];
         if ($this->isAdmin()) {
@@ -20,6 +24,10 @@ class CategoryController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * редактирование категории, требуется авторизация
+    * ожидает параметры id, name
+    */
     public function edit($data) {
         $id = $data['id'];
         $name = $data['name'];
@@ -33,6 +41,9 @@ class CategoryController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * удаление категории, требуется авторизация и ожидает параметр id
+    */
     public function remove($data) {
         $id = $data['id'];
         if ($this->isAdmin()) {
@@ -45,6 +56,9 @@ class CategoryController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * получение категории, НЕ требуется авторизация и ожидает параметр id
+    */
     public function get($data) {
         $id = $data['id'];
         $model = new CategoryModel();
@@ -53,6 +67,10 @@ class CategoryController extends Controller
         } throw new Exception('Категория отсутствует');
     }
     
+    
+    /**
+    * получение всех категорий, НЕ требуется авторизация
+    */
     public function find($data = null) {
         $model = new CategoryModel();
         $categories = $model->find();

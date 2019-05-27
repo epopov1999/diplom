@@ -1,7 +1,7 @@
 <?php
 
 /**
- * класс взаимодействия с БД, с методами функционала API
+ * класс взаимодействия с БД
  */
 class Model
 {
@@ -19,6 +19,7 @@ class Model
 //        self::$database->set_charset('utf8');
 //    }
 
+    //путь до файла базы данных
     private static $dbfile = 'database/shop.db';
     
     protected $connect;
@@ -91,9 +92,7 @@ class Model
 
             $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('admin','popov','123sobaka123')";
             $database->query($sql);
-            $sql = "INSERT INTO `users` (`login`,`password`,`token`) VALUES ('moder','test','test')";
-            $database->query($sql);
-            
+
             $sql = "INSERT INTO `categories` (`id`,`name`) VALUES (0,'Без категории')";
             $database->query($sql);
         }

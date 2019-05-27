@@ -2,11 +2,17 @@
 
 class CartModel extends Model
 {
+    /**
+    * при инициализации объекта получить доступ к корзине, которая хранится в куках
+    */
     public function __construct() {
         parent::__construct();
         $this->cart = (isset($_COOKIE['cart'])) ? json_decode($_COOKIE['cart']) : [];
     }
     
+    /**
+    * подтянуть информацию о товарах из базы по id, которые получены из куки
+    */
     public function getProducts() {
         $products = [];
         foreach ($this->cart as $product) {

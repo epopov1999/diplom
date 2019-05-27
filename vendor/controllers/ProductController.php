@@ -7,6 +7,12 @@ class ProductController extends Controller
         
     }
     
+    /**
+    * добавление товара
+    * ожидает параметры: name, prices = [single, site, team], categoryid
+    * требует загрузки картинки из формы
+    * требуется авторизация
+    */
     public function create($data) {
         $name = $data['name'];
         $prices = $data['prices'];
@@ -24,6 +30,12 @@ class ProductController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * редактирование товара
+    * ожидает параметры: id, name, prices = [single, site, team], categoryid
+    * требует загрузки картинки из формы
+    * требуется авторизация
+    */
     public function edit($data) {
         if ($this->isAdmin()) {
             $id = $data['id'];
@@ -44,6 +56,9 @@ class ProductController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * удаление товара, требует параметр id и необходима авторизация
+    */
     public function remove($data) {
         if ($this->isAdmin()) {
             $model = new ProductModel();
@@ -55,6 +70,10 @@ class ProductController extends Controller
         } throw new Exception('403 Ошибка авторизации');
     }
     
+    /**
+    * получение товара, требует параметры: id, lic (лицензия, строка)
+    * авторизация НЕ требуется
+    */
     public function get($data) {
         $id = $data['id'];
         $lic = $data['lic'];
@@ -64,6 +83,10 @@ class ProductController extends Controller
         } throw new Exception('Товар отсутствует');
     }
     
+    /**
+    * получение всех товаров
+    * авторизация НЕ требуется
+    */
     public function find($data = null) {
         $model = new ProductModel();
         $products = $model->find();

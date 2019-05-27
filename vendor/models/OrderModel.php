@@ -25,74 +25,114 @@ class OrderModel extends Model
         $cust_email = $data['customer_email'];
         $get_customer = $this->connect->query("SELECT `id`, `token` FROM `customers` WHERE `email`='$cust_email'");
         if (!$get_customer) return false;
+
         $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC);
+
         if (!empty($customer)) {
             $customer_id = $customer[0]['id'];
         } else {
             if (!$this->connect->query("INSERT INTO `customers` (`name`,`email`,`token`) VALUES ('$cust_name', '$cust_email','$token');")) return false;
-            $customer_id = $this->connect->insert_id;
+            $customer_id = $this->connect->lastInsertId();
         }
 
-        if (!$this->connect->query("INSERT INTO `$this->table` (`customer_id`) VALUES ($customer_id);")) return false;
-        
-        $order_id = $this->connect->insert_id;
+        if (!$this->connect->query("INSERT INTO `orders` (`customer_id`) VALUES ($customer_id)")) return false;
+        $order_id = $this->connect->lastInsertId();
 
         foreach($data['products'] as $product) {
-            if(!$this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`, `lic`, `count`) VALUES ($order_id, $product->product_id, '$product->lic', $product->count);")) return false;
+            $prod_id = $product['id_product'];
+            $prod_lic = $product['lic'];
+            $prod_count = $product['count'];
+            if(!$this->connect->query("INSERT INTO `orders_products` (`order_id`, `product_id`, `lic`, `count`) VALUES ($order_id, $prod_id, '$prod_lic', $prod_count);")) return false;
         }
         
         return $order_id;
     }
 
-    /**
-    * нужен ли метод редактирования заказа? если да, то какие конкретно входные данные (клиент, продукты и т.д.)?
-    */
     public function edit($data) {
-//        $id = $data['id'];
-//        $customerId = $data['customerId']; 
-//        $sql = "UPDATE `$this->table` SET (`customer_id`) VALUES ($customerId) WHERE `id` = $id;";
-//        $this->table = 'orders_products';
-//
-//        $orderId = $id; 
-//        foreach($data['products'] as $product){
-//            $sql += "UPDATE `$this->table` SET (`order_id`, `product_id`) VALUES ($orderId, $product) WHERE `order_id` = $orderId;";
-//        }
-//
-//        $this->table = 'orders';
-//        return $this->connect->query($sql);
+        return null;
     }
 
     public function remove($orderId) {
         return ($this->connect->query("DELETE FROM `orders_products` WHERE `order_id` = $orderId;") && $this->connect->query("DELETE FROM `orders` WHERE `id` = $orderId;")) ? true : false;
     }
 
-    public function get($token) {
-        $get_customer = $this->connect->query("SELECT * FROM `customers` WHERE `token`='$token'");
-        $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC)[0];
-        $customer_id = $customer['id'];
-        
-        $get_orders = $this->connect->query("SELECT `id` FROM `orders` WHERE `customer_id`=$customer_id");
-        $orders_ids = array_column($get_orders->fetchAll(PDO::FETCH_ASSOC),'id',0);
+    public function get($id) {
 
-        if (count($orders_ids)>1) {
-            return $this->find($orders_ids);
+        $get_order = $this->connect->query("SELECT * FROM `orders` WHERE `id`=$id");
+        if (!$get_order || empty($order_info = $get_order->fetchAll(PDO::FETCH_ASSOC))) return false;
+        
+        $customer_id = $order_info[0]['customer_id'];
+        
+        $get_customer = $this->connect->query("SELECT * FROM `customers` WHERE `id`='$customer_id'");
+        if (!$get_customer) return false;
+        $customer = $get_customer->fetchAll(PDO::FETCH_ASSOC)[0];
+
+        $get_products = $this->connect->query("SELECT * FROM `orders_products` WHERE `order_id`=$id");
+        if (!$get_products) return false;
+        $products = $get_products->fetchAll(PDO::FETCH_ASSOC);
+        $prodModel = new ProductModel();
+        
+        $products_in_order = [];
+        
+        foreach ($products as $product) {
+            
+            $data = $prodModel->get(['id' => $product['product_id']]);
+            $products_in_order [] = ['id_product' => $product['product_id'], 'naim_product' => $data['name'], 'price' => $data['prices'][$product['lic']], 'lic' => $product['lic'], 'count' => $product['count']];
         }
-        $order_id = $orders_ids[0];
-        $cart = new CartModel();
+        
         $order = [
-            'id_order' => $order_id,
+            'id_order' => $id,
             'shopperName' => $customer['name'],
             'shopperEmail' => $customer['email'],
-            'order' => $cart->getProducts()
+            'order' => $products_in_order
         ];
 
-        return $order ?? false;
+        return $order;
+    }
+    
+    /**
+    * проверяет принадлежит ли заказ текущему пользователю
+    */
+    public function isUserOrder($order_id){ 
+        if (isset($_COOKIE['ordertoken'])) {
+            $user_token = $_COOKIE['ordertoken'];
+            $get_customer_id = $this->connect->query("SELECT `customer_id` FROM `orders` WHERE `id`=$order_id");
+            $customer_id = $get_customer_id->fetch(PDO::FETCH_ASSOC)['customer_id'];
+            $get_order_token = $this->connect->query("SELECT `token` FROM `customers` WHERE `id`=$customer_id");
+            if (!$get_order_token) return false;
+            $order_token = $get_order_token->fetch(PDO::FETCH_ASSOC)['token'];
+            return ($order_token == $user_token);
+        } 
+        return false;
     }
 
-    // @todo вернуть все заказы пользователя (если есть токен в куках)
+    // вернуть все заказы пользователя (если есть токен в куках)
     // иначе вернуть все заказы если админ
-    public function find($orders_ids = null) {
-        return null;
+    public function find($filter = null) {
+        $orders = [];
+        if (isset($_COOKIE['ordertoken'])) {
+            $user_token = $_COOKIE['ordertoken'];
+            $get_customer_id = $this->connect->query("SELECT `id` FROM `customers` WHERE `token`='$user_token'");
+            if ($get_customer_id) {
+                $customer_id = $get_customer_id->fetch(PDO::FETCH_ASSOC)['id'];
+                $get_orders = $this->connect->query("SELECT `id` FROM `orders` WHERE `customer_id`=$customer_id");
+                if ($get_orders) {
+                    $orders_ids = $get_orders->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($orders_ids as $order) {
+                        $orders []= $this->get($order['id']);
+                    }
+                }
+            } 
+        } elseif($filter['is_admin']) {
+            $get_orders = $this->connect->query("SELECT * FROM `orders`");
+            if ($get_orders) {
+                $orders_ids = $get_orders->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($orders_ids as $order) {
+                    $orders []= $this->get($order['id']);
+                }
+            }
+        }
+        return $orders;
     }
     
 }

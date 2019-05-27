@@ -36,6 +36,10 @@ class ProductModel extends Model
         return $productId;
     }
     
+    /**
+    * при редактировании сущности товар, важно следить чтобы случайно не оставить товар без картинки
+    * например, удалится старая картинка, но произойдет ошибка и до добавления новой картинки не дойдет...
+    */
     public function edit($data) {
         $id = $data['id'];
         $categoryId = (is_null($data['categoryId']) || $data['categoryId'] == '') ? 0 : $data['categoryId'];
@@ -63,6 +67,9 @@ class ProductModel extends Model
         return true;
     }
 
+    /**
+    *  при удалении товара нужно удалить его из заказов + удалить цены этого товара + удалить картинку
+    */
     public function remove($productId) {
 
         if ($this->connect->query("DELETE FROM `orders_products` WHERE `product_id`=$productId") && $this->connect->query("DELETE FROM `prices` WHERE `product_id` = $productId") && ($get_img_src = $this->connect->query("SELECT `img_src` from `$this->table` WHERE `id` = $productId")) && $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $productId")) {
@@ -73,6 +80,9 @@ class ProductModel extends Model
         return false;
     }
 
+    /**
+    * если лицензия не указана, то вернуть цены всех лицензий
+    */
     public function get($data) {
         $id = $data['id'];
         $lic = (isset($data['lic'])) ? $data['lic'] : null;
@@ -87,7 +97,7 @@ class ProductModel extends Model
             $product['prices'] = array_column($get_prices->fetchAll(PDO::FETCH_ASSOC), 'sum' , 'license');
         } else {
             $get_price = $this->connect->query("SELECT sum from `prices` WHERE `product_id`=$id AND `license`='$lic'");
-            if (!$get_price) return false;
+            if (!$get_price || !$get_price->fetch()) return false;
             $product['price'] = $get_price->fetch()[0];
             $product['lic'] = $lic;
         }
@@ -96,6 +106,7 @@ class ProductModel extends Model
 
     public function find($filter = null) {
         $sql = "SELECT * FROM `$this->table`";
+
         $result = $this->connect->query($sql);
         $products = $result->fetchAll(PDO::FETCH_ASSOC);
         foreach($products as &$product) {

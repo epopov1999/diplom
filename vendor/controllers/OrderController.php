@@ -9,6 +9,11 @@ class OrderController extends Controller{
         
     }
     
+    /**
+    * создание заказа
+    * ожидает параметры: customer_name, customer_email
+    * корзина (куки) должна иметь минимум один товар
+    */
     public function create($data) {
         $cust_name = $data['customer_name'];
         $cust_email = $data['customer_email'];
@@ -19,38 +24,61 @@ class OrderController extends Controller{
                 $order = new OrderModel();
                 $data['products'] = $products;
                 if ($id = $order->create($data)) {
+                    $cart->clearProducts(); //очистить корзину после создания заказа
                     Response::send(true, ['msg' => 'Заказ успешно добавлен', 'id' => $id]);
                 } throw new Exception('Ошибка при создании заказа');
             } throw new Exception('Ошибка при создании заказа: корзина пуста');
-        } throw new Exception('Ошибка при создании заказа: отсутствуют имя и email клиента');
+        } throw new Exception('Ошибка при создании заказа: отсутствуют имя или email клиента');
     }
     
     /**
-    * @todo как правильно редактировать заказ? 
-    * нужен ли этот метод вообще? если да, то какие конкретно входные данные (клиент, продукты и т.д.)?
+    @todo 
+    1. понять какие параметры принимаются. нужно ли редактировать клиента, или передается его id и т.д. и т.п.
+    2. если customer (есть токен по заказу в браузере), тогда отредактировать заказ товарами из корзины. а если админ тогда принимать массив с заказами или что-то в этом роде
     */
     public function edit($data) {
-//       $model = new OrderModel();
-//       return $model->edit($data);
-    }
-    
-    public function remove($data) {
-        
+        return null;
     }
     
     /**
-    * @todo как правильно получать заказ? по id или по токену? по токену может быть несколько заказов
+    * удаление заказа, ожидает параметр id
+    * требуется авторизация
     */
-    public function get($data) {
-//        $token = $_COOKIE['ordertoken'];
-        $id = $data['id'];
-        $model = new OrderModel();
-        Response::send(true, $model->get($id));
+    public function remove($data) {
+        $order_id = $data['id'];
+        $order = new OrderModel();
+        if (!is_null($order_id) && $order_id!="" && $order->get($order_id)) {
+            if ($this->isAdmin()) {
+                if ($order->remove($order_id)) {
+                    Response::send(true, 'Заказ успешно удален');
+                } throw new Exception('Ошибка при удалении заказа');
+            } throw new Exception('403 Ошибка авторизации');
+        } throw new Exception('Заказа не существует');
     }
     
+    /**
+    * получение заказа, ожидает параметр id
+    * необходимо быть либо авторизованым, либо заказ должен принадлежать пользователю, исполняющему запрос
+    */
+    public function get($data) {
+        $order_id = $data['id'];
+        $model = new OrderModel();
+        if (!is_null($order_id) && $order_id!="" && $order = $model->get($order_id)) {
+            if ($this->isAdmin() || $model->isUserOrder($order_id)) {
+                Response::send(true, $order);
+            } throw new Exception('403 нет доступа к заказу');
+        } throw new Exception('Заказа не существует');
+    }
+    
+    /**
+    * получение всех заказов
+    * если авторизован, то все заказы из базы
+    * если есть токен в куках, то все заказы пользователя
+    * иначе пустой массив
+    */
     public function find($data = null) {
         $model = new OrderModel();
-        Response::send(true, $model->find());
+        Response::send(true, $model->find(['is_admin' =>$this->isAdmin()]));
     }
 
 }

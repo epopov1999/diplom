@@ -1,10 +1,18 @@
 <?php
+/**
+* класс работы с корзиной
+* авторизация для методов не требуется
+*/
 class CartController extends Controller
 {
     public function __construct(){
         $this->cart = new CartModel();
     }
     
+    /**
+    * добавить товар в корзину
+    * ожидает параметры: id, lic
+    */
     public function addProduct($data) {
         $product_id = $data['id'];
         $product_lic = $data['lic'];
@@ -17,15 +25,25 @@ class CartController extends Controller
         } throw new Exception('Укажите id товара и тип цены');
     }
     
+    /**
+    * вернуть корзину пользователя 
+    */
     public function get() {
         Response::send(true, $this->cart->getProducts());
     }
     
+    /**
+    * очистка корзины пользователя 
+    */
     public function clear() {
         $this->cart->clearProducts();
         Response::send(true, 'Очистка корзины прошла успешно');
     }
     
+    /**
+    * удаление товара из корзины
+    * ожидает параметры: id, lic
+    */
     public function removeProduct($data) {
         $product_id = $data['id'];
         $product_lic = $data['lic'];

@@ -22,6 +22,9 @@ class CategoryModel extends Model
         return $this->connect->query("UPDATE `$this->table` SET `name`='$name' WHERE `id`=$id");
     }
     
+    /**
+    * при удалении категории, в товарах с этой категорией она заменяется на категорию по умолчанию (id=0)
+    */
     public function remove($id) {
         return ($this->connect->query("UPDATE `products` SET `category_id`=0 WHERE `category_id`=$id") && $this->connect->query("DELETE FROM `$this->table` WHERE `id` = $id"));
     }

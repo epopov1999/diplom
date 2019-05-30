@@ -105,7 +105,10 @@ class ProductModel extends Model
     }
 
     public function find($filter = null) {
-        $sql = "SELECT * FROM `$this->table`";
+
+        $condition = (isset($filter['category_id'])) ? "`category_id`=".$filter['category_id'] : "1";
+
+        $sql = "SELECT * FROM `$this->table` WHERE ".$condition;
 
         $result = $this->connect->query($sql);
         $products = $result->fetchAll(PDO::FETCH_ASSOC);

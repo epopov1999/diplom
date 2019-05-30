@@ -20,13 +20,14 @@ class CartModel extends Model
             $lic = $product->lic;
             $count = $product->count;
 
-            $get_name = $this->connect->query("SELECT name from `products` WHERE id=$id");
-            $name = $get_name->fetchAll(PDO::FETCH_ASSOC)[0]['name'];
+            $product_model = new ProductModel();
+            $product_info = $product_model->get(['id'=>$id]);
 
-            $get_price = $this->connect->query("SELECT `sum` from `prices` WHERE product_id=$id AND `license`='$lic'");
-            $price = $get_price->fetchAll(PDO::FETCH_ASSOC)[0]['sum'];
+            $name = $product_info['name'];
+            $image = $product_info['img_src'];
+            $price = $product_info['prices'][$lic];
 
-            $products [] = ['id_product' => $id, 'count' => $count, 'naim_product' => $name, "price" => $price, 'lic' => $lic];
+            $products [] = ['id_product' => $id, 'count' => $count, 'naim_product' => $name, "price" => $price, 'lic' => $lic, 'image'=>$image];
         }
         return $products;
     }

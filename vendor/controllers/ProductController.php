@@ -87,9 +87,9 @@ class ProductController extends Controller
     * получение всех товаров
     * авторизация НЕ требуется
     */
-    public function find($data = null) {
+    public function find($filter = null) {
         $model = new ProductModel();
-        $products = $model->find();
+        $products = $model->find($filter);
         Response::send(true, $products);
     }
 

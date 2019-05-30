@@ -35,6 +35,7 @@ class CategoryModel extends Model
     }
     
     public function find($filter = null) {
+
         $get_categories = $this->connect->query("SELECT * FROM `$this->table`");
         return ($get_categories) ? $get_categories->fetchAll(PDO::FETCH_ASSOC) : [];
     }

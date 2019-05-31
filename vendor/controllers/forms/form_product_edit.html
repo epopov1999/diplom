@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	</head>
+	<body>
+		<form enctype="multipart/form-data" action="/api/product/edit/" method="post">
+            <input name="id" type="number" placeholder="id">
+			<input name="name" type="text" placeholder="name">
+			<input name="categoryId" type="text" placeholder="categoryId">
+			<input name="prices[single]" type="text" placeholder="single price">
+			<input name="prices[team]" type="text" placeholder="team price">
+			<input name="prices[site]" type="text" placeholder="site price">
+			<input type="file" accept="image/*" name="img_src">
+			<input type="submit">
+		</form>
+		
+    <ul>
+	    <li><a href = '/api/form/createProduct'>createProduct</a></li>
+	    <li><a href = '/api/form/editProduct'>editProduct</a></li>
+	    <li><a href = '/api/form/deleteProduct'>deleteProduct</a></li>
+	    <li><a href = '/api/form/createCategory'>createCategory</a></li>
+	    <li><a href = '/api/form/editCategory'>editCategory</a></li>
+	    <li><a href = '/api/form/deleteCategory'>deleteCategory</a></li>
+	    <li><a href = '/api/category/find'>all categories</a></li>
+	    <li><a href = '/api/product/find'>all products</a></li>
+	</ul>
+
+	</body>
+</html>

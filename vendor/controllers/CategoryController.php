@@ -16,7 +16,7 @@ class CategoryController extends Controller
         $name = $data['name'];
         if ($this->isAdmin()) {
             $model = new CategoryModel();
-            if (!is_null($name)) {
+            if (!is_null($name) && $name != '') {
                 if ($id = $model->create($name)) {
                     Response::send(true, ['msg' => 'Категория успешно добавлена', 'id' => $id]);
                 } throw new Exception('Ошибка при создании категории');
@@ -33,7 +33,7 @@ class CategoryController extends Controller
         $name = $data['name'];
         if ($this->isAdmin()) {
             $model = new CategoryModel();
-            if (!is_null($id) && !is_null($name)) {
+            if (!is_null($id) && !is_null($name) && $name != '') {
                 if ($model->get($id) && $model->edit($data)) {
                     Response::send(true, ['msg' => 'Категория успешно изменена', 'id' => $id]);
                 } throw new Exception('Ошибка при редактировании категории');
